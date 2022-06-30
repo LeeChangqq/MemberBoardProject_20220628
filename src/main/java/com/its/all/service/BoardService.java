@@ -2,9 +2,12 @@ package com.its.all.service;
 
 import com.its.all.common.PagingConst;
 import com.its.all.dto.BoardDTO;
+import com.its.all.dto.CommentDTO;
 import com.its.all.entity.BoardEntity;
+import com.its.all.entity.CommentEntity;
 import com.its.all.entity.MemberEntity;
 import com.its.all.repository.BoardRepository;
+import com.its.all.repository.CommentRepository;
 import com.its.all.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,7 +29,9 @@ import java.util.Optional;
 public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
     public Page<BoardDTO> paging(Pageable pageable) {
+
         int page = pageable.getPageNumber(); //요청페이지값 가져옴.
         // 요청한 페이지가 1이면 페이지값을 0으로 하고 1이 아니면 요청 페이지에서 1을 뺀다.
 //        page = page - 1;
@@ -47,6 +52,28 @@ public class BoardService {
                 ));
         return boardList;
     }
+    public Page<CommentDTO> paging2(Pageable pageable) {
+
+        int page = pageable.getPageNumber(); //요청페이지값 가져옴.
+        // 요청한 페이지가 1이면 페이지값을 0으로 하고 1이 아니면 요청 페이지에서 1을 뺀다.
+//        page = page - 1;
+        // 삼항연산자
+        page = (page == 1)? 0: (page-1);
+        // Page<BoardEntity> => Page<BoardDTO>
+        Page<CommentEntity> comment = commentRepository.findAll(PageRequest.of(page, PagingConst.PAGE_LIMIT, Sort.by(Sort.Direction.DESC, "id")));
+        // BoardEntity => BoardDTO 객체 변환
+        // board: BoardEntity 객체
+        // new Board() 생성자
+        Page<CommentDTO> commentDTOS = comment.map(
+                comment1 -> new CommentDTO(comment1.getId(),
+                        comment1.getCommentWriter(),
+                        comment1.getCommentContents(),
+                        comment1.getCreatedTime(),
+                        comment1.getBoardEntity().getId()
+                ));
+        return commentDTOS;
+    }
+
     public Long save(BoardDTO boardDTO) throws IOException {
         MultipartFile boardFile = boardDTO.getBoardFile();
         String boardFileName = boardFile.getOriginalFilename();
@@ -110,12 +137,49 @@ public class BoardService {
         }
     }
 
-    public List<BoardDTO> search(String q) {
-        List<BoardEntity> boardEntityList = boardRepository.findByBoardTitleContainingOrBoardWriterContaining(q, q);
-        List<BoardDTO> boardDTOList = new ArrayList<>();
-        for(BoardEntity boardEntity: boardEntityList) {
-            boardDTOList.add(BoardDTO.toMemberDTO(boardEntity));
+//    public List<BoardDTO> search(String q,String type) {
+//        if(type.equals("boardTitle")) {
+//            List<BoardEntity> boardEntityList = boardRepository.findByBoardTitleContaining(q);
+//            List<BoardDTO> boardDTOList = new ArrayList<>();
+//
+//            for(BoardEntity boardEntity: boardEntityList) {
+//                boardDTOList.add(BoardDTO.toMemberDTO(boardEntity));
+//            }
+//            return boardDTOList;
+//        }else {
+//            List<BoardEntity> boardEntityList = boardRepository.findByBoardWriterContaining(q);
+//            List<BoardDTO> boardList = new ArrayList<>();
+//
+//            for(BoardEntity boardEntity: boardEntityList) {
+//                boardList.add(BoardDTO.toMemberDTO(boardEntity));
+//            }
+//            return boardList;
+//        }
+
+    //    }
+    public Page<BoardDTO> search(String type, String keyword, Pageable pageable) {
+        int page = pageable.getPageNumber();
+        page = (page == 1) ? 0 : (page - 1);
+
+        Page<BoardEntity> searchEntity = null;
+        boardRepository.findAll(PageRequest.of(page, PagingConst.PAGE_LIMIT, Sort.by(Sort.Direction.DESC, "id")));
+
+
+        if (type.equals("boardTitle")){
+            searchEntity = boardRepository.findByBoardTitleContainingIgnoreCase(keyword,PageRequest.of(page, PagingConst.PAGE_LIMIT, Sort.by(Sort.Direction.DESC, "id")));
+        } else {
+            searchEntity = boardRepository.findByBoardWriterContainingIgnoreCase(keyword,PageRequest.of(page, PagingConst.PAGE_LIMIT, Sort.by(Sort.Direction.DESC, "id")));
         }
-        return boardDTOList;
+
+        Page<BoardDTO> boardList = searchEntity.map(
+                board -> new BoardDTO(board.getId(),
+                        board.getBoardTitle(),
+                        board.getBoardWriter(),
+                        board.getBoardHits(),
+                        board.getCreatedTime(),
+                        board.getBoardContents()
+                ));
+
+        return boardList;
     }
 }

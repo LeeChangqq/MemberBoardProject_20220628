@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </head>
 <body>
-
 <table>
     <tr>
         <th>id</th>
@@ -27,11 +27,82 @@
         <td th:text="${board.boardHits}"></td>
         <td th:if="${board.boardFileName.length() > 14}"><img th:src="@{|/upload/${board.boardFileName}|}" width="100" height="100" alt=""></td>
         <td th:text="*{#temporals.format(board.createdTime, 'yyyy-MM-dd HH:nn:ss')}"></td>
-        <td th:if="${session.member.memberMail == board.boardWriter}"><button onclick="req(1)">수정</button></td>
-        <td th:if="${session.member.memberMail == board.boardWriter || session.member.memberMail == 'admin'}"><button onclick="req(2)">삭제</button></td>
+        <td th:if="${session.mail == board.boardWriter}"><button onclick="req(1)">수정</button></td>
+        <td th:if="${session.mail == board.boardWriter || session.member.memberMail == 'admin'}"><button onclick="req(2)">삭제</button></td>
         <td id="pw"></td>
     </tr>
 </table>
+<form action="/comment/save" method="get">
+    <input type="hidden" name="memberId" th:value="${session.id}">
+    <input type="hidden" name="boardId" th:value="${board.id}">
+    <input type="text" name="commentWriter" th:value="${session.mail}" readonly>
+    <input type="text" name="commentContents">
+    <input type="submit">
+</form>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">글번호</th>
+        <th scope="col">글쓴이</th>
+        <th scope="col">내용</th>
+        <th scope="col">작성시간</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="comment: ${commentList}" th:if="${board.id==comment.boardId}">
+        <td th:text="${comment.id}"></td>
+        <td th:text="${comment.commentWriter}"></td>
+        <td th:text="${comment.commentContents}"></td>
+        <td th:text="*{#temporals.format(comment.commentCreatedDate, 'yyyy-MM-dd HH:mm:ss')}" th:if="${board.id==comment.boardId}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="container">
+    <ul class="pagination justify-content-center">
+        <li class="page-item">
+            <!--첫페이지 요청 링크-->
+            <a class="page-link" th:href="@{|/board/${board.id}?page=1|}">
+                <span>First</span>
+            </a>
+        </li>
+
+        <li th:class="${commentList.first} ? 'disabled'" class="page-item">
+            <!--boardList.first: isFirst()
+                boardList.number: getNumber()-->
+<!--            <a class="page-link" th:href="${commentList.first} ? '#' : @{|/board/${board.id}?page=${commentList.number}|}">-->
+                <span><</span> <!-- < -->
+            </a>
+        </li>
+
+        <!-- startPage ~ endPage 까지 숫자를 만들어주는 역할 -->
+        <!--        <li th:each="page: ${#numbers.sequence(startPage, endPage)}"-->
+        <!--            th:class="${page == boardList.number + 1} ? 'page-item active'" class="page-item">-->
+        <!--            <a class="page-link" th:text="${page}" th:href="@{/board(page=${page})}"></a>-->
+        <!--        </li>-->
+        <li th:each="page: ${#numbers.sequence(startPage, endPage)}"
+            th:class="${page == commentList.number + 1} ? 'page-item active'" class="page-item"
+            th:if="${page} > 0">
+            <a class="page-link" th:text="${page}" th:href="@{|/board/${board.id}?page=${page}|}"></a>
+        </li>
+
+        <!-- 다음 페이지 요청
+            현재 3페이지를 보고 있다면 다음 페이지는 4페이지임.
+            getNumber() 값은 2임.
+            따라서 4페이지를 보고 싶다면 getNumber()+2를 해야 컨트롤러에 4를 요청할 수 있음. -->
+        <li th:class="${commentList.last} ? 'disabled'">
+<!--            <a class="page-link" th:href="${commentList.last} ? '#' : @{|/board/${board.id}?page=${commentList.number + 2}|}">-->
+                <span>&gt;</span>
+            </a>
+        </li>
+
+        <li class="page-item">
+<!--            <a class="page-link" th:href="${endPage} < 1 ? @{|/board/${board.id}?page=${commentList.totalPages + 1}|} : @{|/board/${board.id}?page=${commentList.totalPages}|}">-->
+                <span>Last</span>
+            </a>
+        </li>
+    </ul>
+</div>
 </body>
 <script th:inline="javascript">
     const req = (num) => {

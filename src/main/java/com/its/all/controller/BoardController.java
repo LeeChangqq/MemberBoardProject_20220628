@@ -2,7 +2,9 @@ package com.its.all.controller;
 
 import com.its.all.common.PagingConst;
 import com.its.all.dto.BoardDTO;
+import com.its.all.dto.CommentDTO;
 import com.its.all.service.BoardService;
+import com.its.all.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
+    private final CommentService commentService;
 
     @GetMapping
     public String paging(@PageableDefault(page = 1) Pageable pageable, Model model) {
@@ -41,10 +44,18 @@ public class BoardController {
         boardService.save(boardDTO);
         return "redirect:/board";
     }
+
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable Long id, Model model, @PageableDefault(page = 1) Pageable pageable) {
+        System.out.println(id);
         BoardDTO boardDTO = boardService.detail(id);
         model.addAttribute("board",boardDTO);
+        Page<CommentDTO> commentList = boardService.paging2(pageable); // pageable 인터페이스
+        model.addAttribute("commentList", commentList);
+        int startPage = (((int) (Math.ceil((double) pageable.getPageNumber() / PagingConst.BLOCK_LIMIT))) - 1) * PagingConst.BLOCK_LIMIT + 1;
+        int endPage = ((startPage + PagingConst.BLOCK_LIMIT - 1) < commentList.getTotalPages()) ? startPage + PagingConst.BLOCK_LIMIT - 1 : commentList.getTotalPages();
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
         return "boardPages/detail";
     }
     @GetMapping("/delete/{id}")
@@ -63,17 +74,35 @@ public class BoardController {
         boardService.update(boardDTO);
         return "redirect:/board/";
     }
+    //    @GetMapping("/search")
+//    public String search(@RequestParam(value = "q") String q, Model model, @PageableDefault(page = 1) Pageable pageable,@RequestParam("type") String type) {
+//        model.addAttribute("q",q);
+//        model.addAttribute("type",type);
+//        List<BoardDTO> search = boardService.search(q,type);
+//        model.addAttribute("searchList", search);
+//        Page<BoardDTO> boardList = boardService.paging(pageable);
+//        model.addAttribute("boardList", boardList);
+//        int startPage = (((int) (Math.ceil((double) pageable.getPageNumber() / PagingConst.BLOCK_LIMIT))) - 1) * PagingConst.BLOCK_LIMIT + 1;
+//        int endPage = ((startPage + PagingConst.BLOCK_LIMIT - 1) < boardList.getTotalPages()) ? startPage + PagingConst.BLOCK_LIMIT - 1 : boardList.getTotalPages();
+//        model.addAttribute("startPage", startPage);
+//        model.addAttribute("endPage", endPage);
+//        return "boardPages/search";
+//    }
     @GetMapping("/search")
-    public String search(@RequestParam(value = "q") String q, Model model, @PageableDefault(page = 1) Pageable pageable) {
-        Page<BoardDTO> boardList = boardService.paging(pageable); // pageable 인터페이스
+    public String search(@RequestParam("type") String type,
+                         @RequestParam("q") String q, Model model,
+                         @PageableDefault(page = 1)Pageable pageable) {
+        model.addAttribute("q",q);
+        model.addAttribute("type",type);
+        Page<BoardDTO> boardList = boardService.search(type, q, pageable);
+
         model.addAttribute("boardList", boardList);
+
         int startPage = (((int) (Math.ceil((double) pageable.getPageNumber() / PagingConst.BLOCK_LIMIT))) - 1) * PagingConst.BLOCK_LIMIT + 1;
-        int endPage = ((startPage + PagingConst.BLOCK_LIMIT - 1) < boardList.getTotalPages()) ? startPage + PagingConst.BLOCK_LIMIT - 1 : boardList.getTotalPages();
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        List<BoardDTO> search = boardService.search(q);
-        model.addAttribute("searchList", search);
-        System.out.println("search = " + search);
-        return "boardPages/search";
+        int endPage = ((startPage + PagingConst.BLOCK_LIMIT-1)< boardList.getTotalPages())?startPage + PagingConst.BLOCK_LIMIT -1 : boardList.getTotalPages();
+        model.addAttribute("startPage",startPage);
+        model.addAttribute("endPage",endPage);
+
+        return "/boardPages/search";
     }
 }

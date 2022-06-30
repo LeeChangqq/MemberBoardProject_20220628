@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -34,11 +36,14 @@ public class BoardEntity extends BaseEntity{
     @JoinColumn(name = "member_id")
     private MemberEntity memberEntity;
 
+    @OneToMany(mappedBy = "boardEntity", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    private List<CommentEntity> commentEntityList = new ArrayList<>();
+
     public static BoardEntity toSaveEntity(BoardDTO boardDTO, MemberEntity memberEntity) {
         BoardEntity boardEntity = new BoardEntity();
         boardEntity.setBoardTitle(boardDTO.getBoardTitle());
 //        boardEntity.setBoardWriter(boardDTO.getBoardWriter()); // 회원 이메일을 작성자로 한다면 밑에처럼
-        boardEntity.setBoardWriter(memberEntity.getMemberEmail());
+        boardEntity.setBoardWriter(memberEntity.getMemberMail());
         boardEntity.setBoardContents(boardDTO.getBoardContents());
         boardEntity.setBoardHits(0);
         boardEntity.setBoardFileName(boardDTO.getBoardFileName());
