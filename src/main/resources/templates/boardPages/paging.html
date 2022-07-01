@@ -9,6 +9,7 @@
 <a href="/board/save">글작성</a>
 <a href="/member/logout">로그아웃</a>
 <a th:if="${session.mail == 'admin'}" id="id" href="/member/">관리자 전용 페이지</a>
+<a href="/member/myPage">마이페이지</a>
 <div>
     <form action="/board/search" method="get">
         <select name="type">
@@ -61,7 +62,7 @@
         <li th:class="${boardList.first} ? 'disabled'" class="page-item">
             <!--boardList.first: isFirst()
                 boardList.number: getNumber()-->
-<!--            <a class="page-link" th:href="${boardList.first} ? '#' : @{/board(page=${boardList.number})}">-->
+            <a class="page-link" th:href="${boardList.first} ? '#' : @{/board(page=${boardList.number})}">
                 <span><</span> <!-- < -->
             </a>
         </li>
@@ -82,13 +83,13 @@
             getNumber() 값은 2임.
             따라서 4페이지를 보고 싶다면 getNumber()+2를 해야 컨트롤러에 4를 요청할 수 있음. -->
         <li th:class="${boardList.last} ? 'disabled'">
-<!--            <a class="page-link" th:href="${boardList.last} ? '#' : @{/board(page=${boardList.number + 2})}">-->
+            <a class="page-link" th:href="${boardList.last} ? '#' : @{/board(page=${boardList.number + 2})}">
                 <span>&gt;</span>
             </a>
         </li>
 
         <li class="page-item">
-<!--            <a class="page-link" th:href="${endPage} < 1 ? @{/board(page=${boardList.totalPages + 1})} : @{/board(page=${boardList.totalPages})}">-->
+            <a class="page-link" th:href="${endPage} < 1 ? @{/board(page=${boardList.totalPages + 1})} : @{/board(page=${boardList.totalPages})}">
                 <span>Last</span>
             </a>
         </li>

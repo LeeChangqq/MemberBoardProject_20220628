@@ -19,7 +19,7 @@
         <th>삭제</th>
         <th>수정</th>
     </tr>
-    <tr>
+        <tr>
         <td th:text="${board.id}"></td>
         <td><a th:href="@{|/board/${board.id}}" th:text="${board.boardTitle}"></a></td>
         <td th:text="${board.boardWriter}"></td>
@@ -70,7 +70,7 @@
         <li th:class="${commentList.first} ? 'disabled'" class="page-item">
             <!--boardList.first: isFirst()
                 boardList.number: getNumber()-->
-<!--            <a class="page-link" th:href="${commentList.first} ? '#' : @{|/board/${board.id}?page=${commentList.number}|}">-->
+            <a class="page-link" th:href="${commentList.first} ? '#' : @{|/board/${board.id}?page=${commentList.number}|}">
                 <span><</span> <!-- < -->
             </a>
         </li>
@@ -80,24 +80,23 @@
         <!--            th:class="${page == boardList.number + 1} ? 'page-item active'" class="page-item">-->
         <!--            <a class="page-link" th:text="${page}" th:href="@{/board(page=${page})}"></a>-->
         <!--        </li>-->
-        <li th:each="page: ${#numbers.sequence(startPage, endPage)}"
+        <li  th:each="page: ${#numbers.sequence(startPage, endPage)}"
             th:class="${page == commentList.number + 1} ? 'page-item active'" class="page-item"
             th:if="${page} > 0">
             <a class="page-link" th:text="${page}" th:href="@{|/board/${board.id}?page=${page}|}"></a>
         </li>
-
         <!-- 다음 페이지 요청
             현재 3페이지를 보고 있다면 다음 페이지는 4페이지임.
             getNumber() 값은 2임.
             따라서 4페이지를 보고 싶다면 getNumber()+2를 해야 컨트롤러에 4를 요청할 수 있음. -->
         <li th:class="${commentList.last} ? 'disabled'">
-<!--            <a class="page-link" th:href="${commentList.last} ? '#' : @{|/board/${board.id}?page=${commentList.number + 2}|}">-->
+            <a class="page-link" th:href="${commentList.last} ? '#' : @{|/board/${board.id}?page=${commentList.number + 2}|}">
                 <span>&gt;</span>
             </a>
         </li>
 
         <li class="page-item">
-<!--            <a class="page-link" th:href="${endPage} < 1 ? @{|/board/${board.id}?page=${commentList.totalPages + 1}|} : @{|/board/${board.id}?page=${commentList.totalPages}|}">-->
+            <a class="page-link" th:href="${endPage} < 1 ? @{|/board/${board.id}?page=${commentList.totalPages + 1}|} : @{|/board/${board.id}?page=${commentList.totalPages}|}">
                 <span>Last</span>
             </a>
         </li>
@@ -109,7 +108,6 @@
         let inputTag = "비밀번호 입력: <input type=\"text\" id=\"password\">\n" +
             "<button onclick=\"pwCheck("+num+")\">확인</button>";
         document.getElementById("pw").innerHTML = inputTag;
-
     }
     const pwCheck = (num) => {
         const  pwConfirm = document.getElementById("password").value;

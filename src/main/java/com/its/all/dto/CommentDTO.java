@@ -1,5 +1,7 @@
 package com.its.all.dto;
 
+import com.its.all.entity.BoardEntity;
+import com.its.all.entity.CommentEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +27,15 @@ public class CommentDTO {
         this.boardId = boardId;
     }
 
+//    public static CommentDTO toCommentDTO(CommentEntity commentEntity){
+//        CommentDTO commentDTO = new CommentDTO();
+//        commentDTO.setId(commentEntity.getId());
+//        commentDTO.setCommentWriter(commentEntity.getCommentWriter());
+//        commentDTO.setCommentContents(commentEntity.getCommentContents());
+//        commentDTO.setBoardId(commentEntity.getBoardEntity().getId());
+//        commentDTO.setCommentCreatedDate(commentEntity.getCreatedTime());
+//        return commentDTO;
+//    }
 
 
 }

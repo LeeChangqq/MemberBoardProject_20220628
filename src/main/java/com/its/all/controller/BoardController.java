@@ -105,4 +105,5 @@ public class BoardController {
 
         return "/boardPages/search";
     }
+    
 }

@@ -1,5 +1,6 @@
 package com.its.all.service;
 
+import com.its.all.dto.BoardDTO;
 import com.its.all.dto.CommentDTO;
 import com.its.all.entity.BoardEntity;
 import com.its.all.entity.CommentEntity;
@@ -32,6 +33,5 @@ public class CommentService {
         Long id2 = commentRepository.save(commentEntity).getBoardEntity().getId();
         return id2;
     }
-
 
 }
